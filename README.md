@@ -47,6 +47,14 @@ bei Änderungen auf `main` sowie per manuellem Workflow-Start.
 Als Pages-Quelle muss **GitHub Actions** eingerichtet sein. Nur der geprüfte
 Website-Bestand einschließlich Download und Lizenzen wird hochgeladen.
 Die gesamte Website bleibt mit etwa 415 MB unter dem 1-GB-Pages-Limit.
+Die Pages-Actions verwenden Node.js 24. Bei einem fehlgeschlagenen Deployment
+wartet der Workflow 30 Sekunden und versucht die Veröffentlichung einmal erneut;
+ein weiterer Fehler lässt den Workflow fehlschlagen. Nach der Veröffentlichung
+prüft `tools/verify_deployment.py` die öffentlichen HTML-Seiten, Assets und
+Lizenzdateien gegen die veröffentlichte Revision sowie Installer-Größe,
+Byte-Range und HTTPS-Weiterleitungen. Ein erfolgreicher Build allein reicht
+damit nicht für einen grünen Workflow. Vor dem Upload werden die Copyright-Hinweise
+auf allen 20 Seiten ohne feste Jahreszahl geprüft.
 Quellen: [Git-Dateigrößen](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github),
 [Pages-Workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages),
 [Pages-Limits und Nutzungsbedingungen](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).

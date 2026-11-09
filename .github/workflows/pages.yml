@@ -26,24 +26,39 @@ jobs:
         with:
           python-version: '3.13'
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Build website and restore installer ZIP
         run: python tools/build_site.py
+      - name: Check copyright notices before publishing
+        run: python tools/verify_deployment.py --check-source
       - name: Upload website artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       pages: write
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url }}
     steps:
+      - name: Check out the published revision for live verification
+        uses: actions/checkout@v6
       - name: Deploy GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+      - name: Allow a failed Pages deployment to settle
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+      - name: Retry GitHub Pages once
+        id: retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+      - name: Verify published pages, assets, licenses and installer over HTTPS
+        run: python3 tools/verify_deployment.py
