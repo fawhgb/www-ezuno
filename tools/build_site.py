@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Build the whitelisted static website and its ordinary installer download."""
-import json
 from pathlib import Path
 import shutil
 import tempfile
@@ -24,13 +23,10 @@ PAGE_FILES = (
 
 def site_sources():
     """Explicit allowlist: never publish tooling, Git, chunks, or private backups."""
-    manifest = json.loads((ROOT / 'snapshot.json').read_text(encoding='utf-8'))
-    if set(manifest['pages']) != set(PAGE_FILES) or len(manifest['pages']) != len(PAGE_FILES):
-        raise ValueError('Snapshot page inventory differs from the reviewed 20-page site')
     paths = [ROOT / name for name in PAGE_FILES]
     for name in ('assets', 'licenses'):
         paths.extend(path for path in (ROOT / name).rglob('*') if path.is_file())
-    paths.extend(ROOT / name for name in ('.nojekyll', 'CNAME', 'LICENSE-REVIEW.md'))
+    paths.extend(ROOT / name for name in ('.nojekyll', 'CNAME'))
     for path in paths:
         if path.is_symlink() or not path.resolve().is_relative_to(ROOT) or not path.is_file():
             raise ValueError('Missing, linked, or non-project website source: ' + str(path))

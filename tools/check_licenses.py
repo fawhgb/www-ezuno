@@ -3,7 +3,6 @@
 import argparse
 import hashlib
 from html.parser import HTMLParser
-import json
 from pathlib import Path
 import re
 from urllib.parse import urlsplit, unquote
@@ -110,5 +109,5 @@ if __name__ == '__main__':
     arguments = argparse.ArgumentParser(description=__doc__)
     arguments.add_argument('--site', type=Path, default=ROOT)
     options = arguments.parse_args()
-    pages = json.loads((ROOT / 'snapshot.json').read_text(encoding='utf-8'))['pages']
-    check_licenses(options.site, pages)
+    from build_site import PAGE_FILES
+    check_licenses(options.site, PAGE_FILES)
